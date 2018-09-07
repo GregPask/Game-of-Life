@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<link href="https://fonts.googleapis.com/css?family=Crimson+Text|EB+Garamond|Work+Sans" rel="stylesheet">
+<style>
+#canvas{
+  background: black;
+  margin: auto;
+  display: block;
+  border: 1px solid black;
+  box-shadow: 1px 1px 10px 0.5px black;
+}
+
+body {
+    background-color: #3278a170;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+    <h2 style="text-align: center;">Greg's Game of Life</h2>
+    <hr>
+<canvas id="canvas"></canvas>
+</div>
+
+<script>
+
+
+// <!-- Define Variables ------------------------ -->
+
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+
+let width = canvas.width = 800;
+let height = canvas.height = 800;
+let scale = 8;
+
+let cols = width / scale;
+let rows = width / scale;
+let originalBoard;
+let nextBoard;
+
+
+
+
+//Create a 2D array 100 x 100;
+
+function makeBoard(rows,cols){
+    let array = new Array(rows);
+
+    for(let x = 0; x < array.length; x++){
+        array[x] = new Array(cols);
+    }
+    return array;
+}
+
+
+
+function start(){
+
+    originalBoard = makeBoard(rows, cols);
+
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+         originalBoard[i][j] = Math.floor(Math.random() * 2);
+        }
+    }
+}
+
+
+function draw() {
+
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+
+            let x = i * scale;
+            let y = j * scale;
+
+            if (originalBoard[i][j] == 1) {
+                ctx.beginPath();
+                ctx.fillStyle = "black";
+                ctx.strokeRect(x, y, scale, scale);
+                ctx.fillRect(x, y, scale, scale);
+                ctx.fill();
+            }
+            else {
+                ctx.beginPath();
+                ctx.fillStyle = "purple";
+                ctx.fillRect(x, y, scale, scale);
+                ctx.strokeRect(x, y, scale, scale);
+                ctx.fill()
+            }
+        }
+    }
+
+
+//Create the the next generation board
+    let nextBoard = makeBoard(cols, rows);
+
+
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+
+            let neighbors = Neighbors(originalBoard, i, j);
+            //Any live cell with fewer than two live neighbors dies, as if by under population.   
+            if (originalBoard[i][j] == 1 && neighbors < 2) {
+                nextBoard[i][j] = 0;
+
+            }
+
+            //Any live cell with two or three live neighbors lives on to the next generation.
+            else if (originalBoard[i][j] == 1 && (neighbors == 2 || neighbors == 3)) {
+                nextBoard[i][j] = 1;
+            }
+
+            //Any live cell with more than three live neighbors dies, as if by overpopulation.
+            else if (originalBoard[i][j] == 1 && (neighbors > 3)) {
+                nextBoard[i][j] = 0;
+            }
+
+            //Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+            else if (originalBoard[i][j] == 0 && (neighbors == 3)) {
+                nextBoard[i][j] = 1;
+            }
+            else {
+                nextBoard[i][j] = originalBoard[i][j];
+            }
+        }
+    }
+    originalBoard = nextBoard;
+
+
+
+// <!-- Create the game loop ------ -->
+   // requestAnimationFrame(draw);
+}
+
+
+
+
+function Neighbors(grid,x,y){
+    let sum = 0;
+    for(let i = -1; i < 2; i++){
+        for(let j = -1; j < 2; j++){
+           
+           let col = (x + i + cols) % cols;
+           let row = (y + j + rows) % rows;
+            
+            sum += grid[col][row];
+        }
+    }
+    sum -= grid[x][y];
+    return sum;
+}
+
+
+
+
+
+
+function update(){
+  start();
+ setInterval("draw()",25);
+}
+
+update();
+
+
+
+
+</script>
+</body>
+</html>
+
